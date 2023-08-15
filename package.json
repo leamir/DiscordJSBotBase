@@ -18,6 +18,7 @@
   "homepage": "https://github.com/leamir/DiscordJSBotBase#readme",
   "devDependencies": {
     "@types/node": "^20.5.0",
+    "eslint": "^8.47.0",
     "typescript": "^5.1.6"
   },
   "dependencies": {
