@@ -1,21 +1,29 @@
 import 'dotenv/config';
-import { Events } from 'discord.js';
 import { client } from './util';
 import * as fs from 'node:fs';
-import { eventFileClass, eventType } from './helpers/fileClasses';
+import { EventFileClass, EventType } from './helpers/fileClasses';
 
-client.once(Events.ClientReady, c => {
-	console.log(`Ready! Logged in as ${c.user.tag}`);
-});
+const eventFiles = 
+	fs.readdirSync('./out/events')
+		.filter((fileName) => fileName.endsWith('.js'))
+		.map((fileName) => fileName = `./events/${fileName}` );
 
-const eventFiles = fs.readdirSync('./out/events').filter((fileName) => fileName.endsWith('.js')).map((fileName) => fileName = `./out/${fileName}`);
 eventFiles.forEach(async (filePath) => {
-	const eventData = (await import(filePath)) as eventFileClass;
+	
+	try {
+		const eventData = (await import(filePath)).default.default as EventFileClass<any>;
 
-	if (eventData.eventType == eventType.on)
-		client.on(eventData.eventName, eventData.onRun);
-	else
-		client.once(eventData.eventName, eventData.onRun);
+		if (eventData.onLoad)
+			eventData.onLoad();
+
+		if (eventData.EventType == EventType.on)
+			client.on(eventData.eventName, eventData.onRun);
+		else
+			client.once(eventData.eventName, eventData.onRun);
+	}
+	catch(e) {
+		console.log(`[ERR] Can't load event file '${filePath}'\n`, (e as any).stack);
+	}
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);

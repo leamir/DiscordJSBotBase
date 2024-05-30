@@ -1,9 +1,9 @@
 import { Client, Events } from "discord.js";
-import { eventFileClass, eventType } from "../helpers/fileClasses";
+import { EventFileClass, EventType } from "../helpers/fileClasses";
 
-export default new eventFileClass(
+export default new EventFileClass(
     Events.ClientReady,
-    eventType.once,
+    EventType.once,
     (client: Client<true>) => {
         console.log(`Logged in as ${client.user.tag}!`);
     }

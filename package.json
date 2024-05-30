@@ -4,7 +4,10 @@
   "description": "A base for DiscordJS Bots",
   "main": "out/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx tsc && node .",
+    "register-cmd-global": "npx tsc && node . --registerglobalcommands",
+    "register-cmd-local": "npx tsc && node . --registercommands",
+    "execute": "node . "
   },
   "repository": {
     "type": "git",
