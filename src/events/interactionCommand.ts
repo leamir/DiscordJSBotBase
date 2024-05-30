@@ -15,7 +15,7 @@ export default new EventFileClass(
 			return;
 
 		if (commandEventEmitter.listenerCount(interaction.commandName) == 0) {
-			let logCode = await writeLog(LogTypes.COMMAND_ERRORS, (new Error(`Command ${interaction.commandName} isn't implemented.\n\LEAMIR_CMD_ERR_NOT_IMPLEMENTED`).stack) as string);
+			let logCode = await writeLog(LogTypes.COMMAND_ERRORS, (new Error(`Command ${interaction.commandName} isn't implemented.\n\CMD_ERR_NOT_IMPLEMENTED`).stack) as string);
 			const embed = new EmbedBuilder()
 				.setTitle("Oh não!")
 				.setDescription(`Ocorreu um erro na execução deste comando.\nTente novamente mais tarde.\n\nPara pedir suporte, inclua o código \`${logCode}\` na sua mensagem.`)
@@ -23,7 +23,7 @@ export default new EventFileClass(
 				.setTimestamp()
 				.setFooter(
 					{
-						text: "Código de erro legível: LEAMIR_CMD_ERR_NOT_IMPLEMENTED"
+						text: "Código de erro legível: CMD_ERR_NOT_IMPLEMENTED"
 					}
 				);
 
