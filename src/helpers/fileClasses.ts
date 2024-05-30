@@ -1,4 +1,4 @@
-import { ClientEvents, CommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, ClientEvents, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from 'discord.js';
 
 export enum EventType {
     'once',
@@ -21,11 +21,11 @@ export class EventFileClass<T extends keyof ClientEvents> {
 
 export class commandFileClass
 {
-    public readonly cmdConstructor: SlashCommandBuilder;
-    public readonly onRun: (interaction: CommandInteraction) => void;
+    public readonly cmdConstructor: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
+    public readonly onRun: (interaction: ChatInputCommandInteraction) => void;
     public readonly onLoad?: () => void;
 
-    constructor(cmdConstructor: SlashCommandBuilder, onRun: (interaction: CommandInteraction) => void, onLoad?: () => void)
+    constructor(cmdConstructor: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder, onRun: (interaction: ChatInputCommandInteraction) => void, onLoad?: () => void)
     {
         this.cmdConstructor = cmdConstructor;
         this.onRun = onRun;

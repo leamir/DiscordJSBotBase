@@ -32,7 +32,6 @@ export default new EventFileClass(
 		}
 
 		commandEventEmitter.emit(interaction.commandName, interaction);
-		
 	},
 	async function () {
 		const commandsFiles =

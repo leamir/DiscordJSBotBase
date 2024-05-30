@@ -6,7 +6,7 @@ export default new commandFileClass(
     new SlashCommandBuilder()
         .setName('ping')
         .setDescription("Retorna o valor "),
-    (interaction: CommandInteraction) => {
+    (interaction) => {
         const responseEmbed = new EmbedBuilder()
             .setColor(0x00FF00)
             .setTitle(':ping_pong: Pong!')
