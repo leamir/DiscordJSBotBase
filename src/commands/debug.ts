@@ -84,8 +84,8 @@ async function processEvalCommand(interaction: ChatInputCommandInteraction)
 		.setTitle("Evaluate expression")
 	
 	const codeInput = new TextInputBuilder()
-		.setCustomId('code')
-		.setLabel("What's the code that you want to evaluete?")
+		.setCustomId('debug-eval-modal-arbitrary-code')
+		.setLabel("What's the code that you want to evaluate?")
 		.setStyle(TextInputStyle.Paragraph)
 
 	const responseActionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(codeInput);
@@ -93,5 +93,4 @@ async function processEvalCommand(interaction: ChatInputCommandInteraction)
 	responseModal.addComponents(responseActionRow);
 
 	await interaction.showModal(responseModal);
-	//TODO: Implement
 }
