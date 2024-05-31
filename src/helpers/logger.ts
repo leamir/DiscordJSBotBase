@@ -35,5 +35,5 @@ export async function writeLog(type: LogTypes, message: string) {
 
     fs.writeFileSync(finalPath, message);
 
-    return logCode;
+    return `${logPaths[type]}/${logCode}`;
 }

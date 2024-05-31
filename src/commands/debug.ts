@@ -1,5 +1,7 @@
 import { ActionRowBuilder, ChatInputCommandInteraction, EmbedBuilder, ModalActionRowComponentBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { commandFileClass } from "../helpers/fileClasses";
+import path from "node:path";
+import fs from "node:fs";
 
 export default new commandFileClass(
 	new SlashCommandBuilder()
@@ -11,10 +13,34 @@ export default new commandFileClass(
 			subcommand
 				.setName('eval')
 				.setDescription('Roda um código JS arbitrário no bot')
+		)
+		.addSubcommand(subcommand => 
+			subcommand
+				.setName('get-log')
+				.setDescription("Receber informações de um log")
+				.addStringOption(option =>
+					option
+						.setName('category')
+						.setDescription('Categoria do log')
+						.setRequired(true)
+						.setAutocomplete(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('code')
+						.setDescription('Código do log')
+						.setRequired(true)
+						.setAutocomplete(true)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('send-chat')
+						.setDescription("Enviar log no chat de forma publica?")
+				)
 		),
 	(interaction) => {
 		//TODO: Limit command using database, instead of hardcoding staff
-		if (interaction.member?.user.id != '603063797871280139')
+		if (interaction.user.id != '603063797871280139')
 		{
 			const responseEmbed = new EmbedBuilder()
 				.setColor(0xFF0000)
@@ -26,12 +52,30 @@ export default new commandFileClass(
 		}
 
 		if (interaction.options.getSubcommand() == 'eval')
-		{			
 			return processEvalCommand(interaction);
-		}
+		else if (interaction.options.getSubcommand() == 'get-log')
+			return processLogFetch(interaction); 
 	}
-)
+);
 
+
+async function processLogFetch(interaction: ChatInputCommandInteraction)
+{
+	const sendChat = !(interaction.options.getBoolean('send-chat') || false);
+
+	const category = interaction.options.getString('category');
+	const code = interaction.options.getString('code');
+
+	if (category == null || code == null)
+		return;
+
+	let finalPath = path.join( __dirname, '../../', 'logs', category, code) + '.txt';
+
+	if (!fs.existsSync(finalPath))
+		return await interaction.reply({ content: `O código de erro do erro \`${category}/${code}\` não foi encontrado.`, ephemeral: sendChat });
+
+	await interaction.reply({ content: `Informações do erro \`${category}/${code}\`:`, ephemeral: sendChat, files: [finalPath] });
+}
 
 async function processEvalCommand(interaction: ChatInputCommandInteraction)
 {
