@@ -3,7 +3,8 @@ import * as path from 'node:path';
 import { generateRandomString } from '../util';
 
 export enum LogTypes {
-    COMMAND_ERRORS
+    COMMAND_ERRORS,
+    UNHANDLED_ERROR
 }
 
 type LogPathsType = {
@@ -11,7 +12,8 @@ type LogPathsType = {
 };
 
 export const logPaths: LogPathsType = { // Logs paths are inside the 'logs' folder
-    [LogTypes.COMMAND_ERRORS]: "commands"
+    [LogTypes.COMMAND_ERRORS]: "commands",
+    [LogTypes.UNHANDLED_ERROR]: "unhandled"
 };
 
 export async function writeLog(type: LogTypes, message: string) {

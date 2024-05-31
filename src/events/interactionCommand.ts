@@ -1,11 +1,11 @@
-import { CommandInteraction, EmbedBuilder, REST, Routes } from "discord.js";
+import { EmbedBuilder, REST, Routes } from "discord.js";
 import { commandFileClass, EventFileClass, EventType } from "../helpers/fileClasses";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { EventEmitter } from "node:events";
 import { LogTypes, writeLog } from "../helpers/logger";
+import commandEmitterClass from "../helpers/commandEventEmitter";
 
-const commandEventEmitter = new EventEmitter();
+const commandEventEmitter = new commandEmitterClass();
 
 export default new EventFileClass(
 	'interactionCreate',
@@ -31,7 +31,31 @@ export default new EventFileClass(
 			return;
 		}
 
-		commandEventEmitter.emit(interaction.commandName, interaction);
+		try {
+			await commandEventEmitter.emitSync(interaction.commandName, interaction);
+		}
+		catch(e: any)
+		{
+			let logCode = await writeLog(LogTypes.COMMAND_ERRORS, (e.stack) as string);
+			const embed = new EmbedBuilder()
+				.setTitle("Oh não!")
+				.setDescription(`Ocorreu um erro na execução deste comando.\nTente novamente mais tarde.\n\nPara pedir suporte, inclua o código \`${logCode}\` na sua mensagem.`)
+				.setColor("#FF0000")
+				.setTimestamp()
+
+			try {
+				await interaction.reply({ embeds: [embed], ephemeral: true });
+			}
+			catch(x) {
+				try {
+					await interaction.followUp({ embeds: [embed], ephemeral: true });
+				}
+				catch(y: any) {
+					writeLog(LogTypes.UNHANDLED_ERROR, `Command error cannot be sent to user.\nError message: ${e.stack}\n\nNew message: ${y.stack}`);
+				}
+			}
+			return;
+		}
 	},
 	async function () {
 		const commandsFiles =
