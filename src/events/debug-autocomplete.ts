@@ -19,7 +19,7 @@ export default new EventFileClass(
 		if (interaction.user.id != '603063797871280139')
 			return await interaction.respond([]);
 
-		if (interaction.options.getSubcommand() == 'get-log' || interaction.options.getSubcommand() == 'delete-log')
+		if (interaction.options.getSubcommand() == 'get-log' || interaction.options.getSubcommand() == 'delete-log' || interaction.options.getSubcommand() == 'get-logs')
 		{
 			const focusedOption = interaction.options.getFocused(true);
 			if (focusedOption.name == 'category')

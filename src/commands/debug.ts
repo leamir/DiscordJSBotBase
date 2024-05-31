@@ -1,8 +1,9 @@
-import { ActionRowBuilder, ChatInputCommandInteraction, EmbedBuilder, ModalActionRowComponentBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, ModalActionRowComponentBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { commandFileClass } from "../helpers/fileClasses";
 import path from "node:path";
 import fs from "node:fs";
 import { LogTypes, writeLog } from "../helpers/logger";
+import { getFilesNamesAndCreateAttachment } from "../util";
 
 export default new commandFileClass(
 	new SlashCommandBuilder()
@@ -57,6 +58,29 @@ export default new commandFileClass(
 						.setRequired(true)
 						.setAutocomplete(true)
 				)
+		)
+		.addSubcommand(subcommand => 
+			subcommand
+				.setName('get-logs')
+				.setDescription("Pegar todas as logs de uma categoria, que contem um valor")
+				.addStringOption(option =>
+					option
+						.setName('category')
+						.setDescription('Categoria do log')
+						.setRequired(true)
+						.setAutocomplete(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('code')
+						.setDescription('Código (ou parte do código) do log')
+						.setAutocomplete(true)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('send-chat')
+						.setDescription("Enviar log no chat de forma publica?")
+				)
 		),
 	(interaction) => {
 		//TODO: Limit command using database, instead of hardcoding staff
@@ -77,6 +101,8 @@ export default new commandFileClass(
 			return processLogFetch(interaction); 
 		else if (interaction.options.getSubcommand() == 'delete-log')
 			return processLogDelete(interaction);
+		else if (interaction.options.getSubcommand() == 'get-logs')
+			return processLogFind(interaction);
 	}
 );
 
@@ -97,6 +123,49 @@ async function processLogFetch(interaction: ChatInputCommandInteraction)
 		return await interaction.reply({ content: `O código de erro do erro \`${category}/${code}\` não foi encontrado.`, ephemeral: sendChat });
 
 	await interaction.reply({ content: `Informações do erro \`${category}/${code}\`:`, ephemeral: sendChat, files: [finalPath] });
+}
+
+async function processLogFind(interaction: ChatInputCommandInteraction)
+{
+	const sendChat = !(interaction.options.getBoolean('send-chat') || false);
+
+	const category = interaction.options.getString('category');
+	const code = interaction.options.getString('code');
+
+	if (category == null)
+		return;
+
+	let finalPath = path.join( __dirname, '../../', 'logs', category);
+
+	if (!fs.existsSync(finalPath))
+		return await interaction.reply({ content: `A categoria \`${category}\` não foi encontrada.`, ephemeral: sendChat });
+
+	let files: (String[] | Error) 
+	try {
+		files = getFilesNamesAndCreateAttachment(finalPath);
+	}
+	catch(e: any) {
+		files = e;
+	}
+
+	if (files instanceof Error)
+	{
+		await interaction.reply({ content: `Erro ao buscar a categoria \`${category}\`:` + files.stack, ephemeral: sendChat });
+		return;
+	}
+
+	if (code != null)
+		files = files.filter(file => file.includes(code));
+
+	let filesStr = files.join('\n');
+
+	const buffer = Buffer.from((files.length != 0) ? filesStr : ' ', 'utf-8');
+    let finalAttachment = new AttachmentBuilder(buffer, { name: 'logs.txt' });
+	
+	if (code == null)
+		await interaction.reply({ content: `Lista de erros na categoria \`${category}\`:`, ephemeral: sendChat, files: [finalAttachment] });
+	else
+		await interaction.reply({ content: `Lista de erros na categoria \`${category}\` (contendo \`${code}\` no nome):`, ephemeral: sendChat, files: [finalAttachment] });
 }
 
 async function processEvalCommand(interaction: ChatInputCommandInteraction)

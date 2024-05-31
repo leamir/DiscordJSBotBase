@@ -1,6 +1,7 @@
 import { AttachmentBuilder, Client, GatewayIntentBits } from 'discord.js';
-import { logPaths } from './helpers/logger';
 import util from 'node:util';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -69,4 +70,20 @@ export async function evaluateAndCaptureOutput(code: string): Promise<Attachment
     const combinedOutput = `Console Output:\n${consoleOutput}\n\nResult:\n${result}`;
     const buffer = Buffer.from(combinedOutput, 'utf-8');
     return new AttachmentBuilder(buffer, { name: 'output.txt' });
+}
+
+export function getFilesNamesAndCreateAttachment(folderPath: string) {
+    try {
+        const files = fs.readdirSync(folderPath);
+
+        const fileNamesWithoutExtension = files.map(file => {
+            const fullPath = path.join(folderPath, file);
+            return path.basename(file, path.extname(file));
+        });
+
+        return fileNamesWithoutExtension;
+    } catch (error) {
+        console.error('Error reading files:', error);
+        return new Error('Error reading files:\n' + util.inspect(error));
+    }
 }
