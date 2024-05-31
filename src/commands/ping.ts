@@ -15,7 +15,6 @@ export default new commandFileClass(
                 { name: 'Tempo de recebimento da mensagem', value: `${Math.abs(Date.now() - interaction.createdTimestamp)}ms`}
             )
         interaction.reply({ content: '', embeds: [responseEmbed], ephemeral: true});
-        throw new Error("test error by leamir")
     },
     () => {
 
